@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="오늘 브리핑">
+<title>오늘 브리핑</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f5f5f3;--card:#fff;--text:#1a1a1a;--text2:#6b6b6b;--text3:#a0a09e;
+  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.12);
+  --r:16px;--rs:10px;
+  --good:#1a9e75;--norm:#2a7fd4;--bad:#c07a10;--vbad:#b03030;
+  --acc:#3a7bd5;
+  --wbg:#fff8ed;--wbd:#f5d48a;--wtx:#8a5a00;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#111110;--card:#1c1c1a;--text:#f0f0ee;--text2:#9a9a97;--text3:#636360;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --wbg:#231900;--wbd:#6a4500;--wtx:#f0b850;
+}}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;min-height:100vh;padding-bottom:3rem}
+.st{height:max(env(safe-area-inset-top,0px),16px)}
+.hdr{padding:.6rem 1.1rem .9rem;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.hdr h1{font-size:20px;font-weight:600;letter-spacing:-.4px}
+.dline{font-size:13px;color:var(--text2);margin-top:3px}
+.lline{font-size:12px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:4px;min-height:18px}
+.hright{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.btn{background:var(--card);border:.5px solid var(--border2);border-radius:var(--rs);padding:7px 12px;font-size:13px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;font-family:inherit}
+.btn:active{opacity:.6;transform:scale(.96)}
+.tabs{display:flex;gap:6px;padding:0 1.1rem;margin-bottom:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:var(--card);border:.5px solid var(--border2);border-radius:20px;padding:6px 14px;font-size:13px;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0}
+.tab.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.tab:active{opacity:.6}
+.sec{padding:0 1.1rem;margin-bottom:1rem}
+.slbl{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.07em;margin-bottom:8px}
+.card{background:var(--card);border:.5px solid var(--border);border-radius:var(--r);overflow:hidden}
+.tgrid{display:grid;grid-template-columns:1fr 1fr 1fr}
+.tcell{padding:.9rem .8rem;border-right:.5px solid var(--border);text-align:center}
+.tcell:last-child{border-right:none}
+.tlbl{font-size:10px;color:var(--text3);margin-bottom:4px}
+.tval{font-size:26px;font-weight:300;letter-spacing:-1px}
+.tval sup{font-size:12px;font-weight:400}
+.tsub{font-size:10px;color:var(--text3);margin-top:2px}
+.irow{display:flex;justify-content:space-between;align-items:center;padding:10px 1.1rem;border-top:.5px solid var(--border);font-size:14px}
+.ikey{color:var(--text2)}
+.ival{font-weight:500;display:flex;align-items:center;gap:5px}
+.wemo{font-size:18px}
+.dwrap{border-top:.5px solid var(--border);padding:10px 1.1rem 12px}
+.dlbl{font-size:11px;color:var(--text3);margin-bottom:8px}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.dchip{background:var(--bg);border-radius:var(--rs);padding:9px 4px;text-align:center}
+.dtime{font-size:11px;color:var(--text3);margin-bottom:3px}
+.dval{font-size:13px;font-weight:600}
+.good{color:var(--good)}.norm{color:var(--norm)}.bad{color:var(--bad)}.vbad{color:var(--vbad)}
+.wrow{display:flex;align-items:center;justify-content:space-between;padding:10px 1.1rem;border-bottom:.5px solid var(--border);font-size:13px}
+.wrow:last-child{border-bottom:none}
+.wday{font-weight:500;min-width:38px;line-height:1.4}
+.wday.td{color:var(--acc)}
+.wday span{font-size:10px;color:var(--text3);font-weight:400}
+.wsky{display:flex;align-items:center;gap:4px;color:var(--text2);flex:1;padding:0 8px;font-size:12px}
+.wskyemo{font-size:15px}
+.wtemps{display:flex;gap:7px}
+.whi{font-weight:500}
+.wlo{color:var(--text3)}
+.wpop{font-size:11px;color:var(--norm);min-width:28px;text-align:right}
+.dheader{padding:10px 1.1rem 6px;font-size:12px;font-weight:600;color:var(--text2);background:var(--bg);border-bottom:.5px solid var(--border)}
+.dheader.dtoday{color:var(--acc)}
+.si{padding:9px 1.1rem 9px 1.5rem;border-bottom:.5px solid var(--border)}
+.si:last-child{border-bottom:none}
+.scal{font-size:11px;color:var(--text3);margin-bottom:3px}
+.stitle{font-size:15px;font-weight:500}
+.stime{font-size:12px;color:var(--text2);margin-top:2px}
+.sempty{padding:1.5rem;text-align:center;font-size:13px;color:var(--text3)}
+.notice{display:flex;align-items:flex-start;gap:8px;background:var(--wbg);border:.5px solid var(--wbd);border-radius:var(--rs);padding:11px 13px;font-size:13px;color:var(--wtx);line-height:1.55}
+.loading{padding:2rem;text-align:center;color:var(--text3);font-size:14px}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--text3);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{background:#fff0f0;border-radius:var(--rs);padding:12px 14px;font-size:13px;color:#b03030;line-height:1.5}
+@media(prefers-color-scheme:dark){.err{background:#2a0d0d;color:#e07070}}
+.upd{font-size:11px;color:var(--text3);text-align:right;margin-top:5px}
+.ovl{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-end;justify-content:center}
+.ovl.open{display:flex}
+.ssheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:1.2rem 1.2rem calc(1.5rem + env(safe-area-inset-bottom,0px));max-height:80vh;overflow-y:auto}
+.shandle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 1rem}
+.stit{font-size:16px;font-weight:600;margin-bottom:12px}
+.siwrap{position:relative}
+.sinput{width:100%;background:var(--bg);border:.5px solid var(--border2);border-radius:var(--rs);padding:11px 40px 11px 14px;font-size:15px;color:var(--text);font-family:inherit;outline:none}
+.sinput:focus{border-color:var(--text3)}
+.sclr{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0;line-height:1;display:none}
+.sres{margin-top:10px}
+.ritem{padding:12px 4px;border-bottom:.5px solid var(--border);cursor:pointer;font-size:14px;color:var(--text)}
+.ritem:last-child{border-bottom:none}
+.ritem:active{opacity:.6}
+.rsub{font-size:12px;color:var(--text3);margin-top:2px}
+.shint{font-size:13px;color:var(--text3);padding:1rem 0;text-align:center}
+</style>
+</head>
+<body>
+<div class="st"></div>
+<div class="hdr">
+  <div>
+    <h1>오늘 브리핑</h1>
+    <div class="dline" id="dlbl"></div>
+    <div class="lline">📍 <span id="locname">위치 확인 중...</span></div>
+  </div>
+  <div class="hright">
+    <button class="btn" onclick="init()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      새로고침
+    </button>
+    <button class="btn" onclick="openSearch()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      지역 검색
+    </button>
+  </div>
+</div>
+
+<div id="schedArea"></div>
+<div id="wtabs"></div>
+<div id="warea"></div>
+
+<div class="ovl" id="ovl" onclick="ovlClick(event)">
+  <div class="ssheet">
+    <div class="shandle"></div>
+    <div class="stit">지역 검색</div>
+    <div class="siwrap">
+      <input class="sinput" id="sinput" type="text" placeholder="국내외 도시명 입력 (예: 수원, Tokyo, Paris)" oninput="onSInput()" autocomplete="off"/>
+      <button class="sclr" id="sclr" onclick="clrSearch()">×</button>
+    </div>
+    <div class="sres" id="sres"><div class="shint">국내외 도시명을 입력하세요</div></div>
+  </div>
+</div>
+
+<script>
+var KMA='4a288461c81a5030d7a2bfd0877c6ef6974a30f9f675cda526931f42b0c0c24f';
+var DAYS=['일','월','화','수','목','금','토'];
+var SKYMAP={'1':'맑음','3':'구름많음','4':'흐림'};
+var PTYMAP={'0':'','1':'비','2':'비/눈','3':'눈','4':'소나기'};
+var EMOJIS={'맑음':'☀️','구름많음':'⛅','흐림':'☁️','비':'🌧️','소나기':'🌦️','눈':'❄️','비/눈':'🌨️','안개':'🌫️','뇌우':'⛈️','이슬비':'🌦️','우박':'🌨️'};
+
+var nx=55,ny=124,lat=37.4563,lng=126.7052,locName='인천',isKR=true;
+var wtab='today',stab='today';
+var wCache={};
+var stimer=null;
+
+function p2(n){return String(n).padStart(2,'0')}
+function todayStr(d){return ''+d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())}
+
+function setDate(){
+  var n=new Date();
+  document.getElementById('dlbl').textContent=n.getFullYear()+'년 '+(n.getMonth()+1)+'월 '+n.getDate()+'일 ('+DAYS[n.getDay()]+')';
+}
+
+function baseDT(now){
+  var h=now.getHours();
+  if(h<2){var p=new Date(+now-86400000);return{d:todayStr(p),t:'2300'}}
+  for(var i=0,ts=[23,20,17,14,11,8,5,2];i<ts.length;i++){if(h>=ts[i])return{d:todayStr(now),t:p2(ts[i])+'00'}}
+  return{d:todayStr(now),t:'0200'}
+}
+
+function dustGrd(v){
+  if(!v)return{l:'정보없음',c:'norm'};
+  if(v.includes('좋음'))return{l:'좋음',c:'good'};
+  if(v.includes('매우'))return{l:'매우나쁨',c:'vbad'};
+  if(v.includes('나쁨'))return{l:'나쁨',c:'bad'};
+  if(v.includes('보통'))return{l:'보통',c:'norm'};
+  return{l:v,c:'norm'}
+}
+
+function ll2grid(la,lo){
+  var RE=6371.00877,G=5,S1=30,S2=60,OL=126,OA=38,XO=43,YO=136,D=Math.PI/180;
+  var re=RE/G,s1=S1*D,s2=S2*D,ol=OA*D;
+  var sn=Math.log(Math.cos(s1)/Math.cos(s2))/Math.log(Math.tan(Math.PI*.25+s2*.5)/Math.tan(Math.PI*.25+s1*.5));
+  var sf=Math.pow(Math.tan(Math.PI*.25+s1*.5),sn)*Math.cos(s1)/sn;
+  var ro=re*sf/Math.pow(Math.tan(Math.PI*.25+ol*.5),sn);
+  var ra=re*sf/Math.pow(Math.tan(Math.PI*.25+la*D*.5),sn);
+  var th=(lo-OL)*D*sn;
+  return{nx:Math.floor(ra*Math.sin(th)+XO+0.5),ny:Math.floor(ro-ra*Math.cos(th)+YO+0.5)}
+}
+
+function wmoDesc(c){
+  if(c===0)return'맑음';if(c<=2)return'구름많음';if(c<=3)return'흐림';
+  if(c<=49)return'안개';if(c<=59)return'이슬비';if(c<=69)return'비';
+  if(c<=79)return'눈';if(c<=82)return'소나기';if(c<=84)return'우박';if(c<=99)return'뇌우';
+  return'흐림'
+}
+
+function emo(desc){return EMOJIS[desc]||'🌡️'}
+
+// ── 기상청 오늘 ──
+async function kmaToday(){
+  var now=new Date(),bt=baseDT(now),td=todayStr(now);
+  var u1='https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey='+KMA+'&pageNo=1&numOfRows=300&dataType=JSON&base_date='+bt.d+'&base_time='+bt.t+'&nx='+nx+'&ny='+ny;
+  var u2='https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey='+KMA+'&pageNo=1&numOfRows=300&dataType=JSON&base_date='+td+'&base_time=0200&nx='+nx+'&ny='+ny;
+  var u3='https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getMinuDustFrcstDspth?serviceKey='+KMA+'&returnType=json&numOfRows=50&pageNo=1&searchDate='+td.slice(0,4)+'-'+td.slice(4,6)+'-'+td.slice(6,8)+'&InformCode=PM25';
+  var prev=new Date(+now-86400000),pd=todayStr(prev);
+  var u4='https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey='+KMA+'&pageNo=1&numOfRows=300&dataType=JSON&base_date='+pd+'&base_time=0200&nx='+nx+'&ny='+ny;
+
+  var [r1,r2,r3,r4]=await Promise.all([fetch(u1),fetch(u2),fetch(u3),fetch(u4)]);
+  var [j1,j2,j3,j4]=await Promise.all([r1.json(),r2.json(),r3.json(),r4.json()]);
+
+  var d={};
+  var all=(j1.response&&j1.response.body&&j1.response.body.items?j1.response.body.items.item:[]).concat(
+           j2.response&&j2.response.body&&j2.response.body.items?j2.response.body.items.item:[]);
+  for(var i=0;i<all.length;i++){
+    var it=all[i];
+    if(it.fcstDate!==td)continue;
+    if(!d[it.fcstTime])d[it.fcstTime]={};
+    if(!d[it.fcstTime][it.category])d[it.fcstTime][it.category]=it.fcstValue;
+  }
+
+  var TMX=null,TMN=null,POP=0;
+  var times=Object.keys(d);
+  for(var i=0;i<times.length;i++){
+    var t=times[i];
+    if(d[t].TMX&&TMX===null)TMX=Math.round(parseFloat(d[t].TMX));
+    if(d[t].TMN&&TMN===null)TMN=Math.round(parseFloat(d[t].TMN));
+    if(d[t].POP!==undefined)POP=Math.max(POP,parseInt(d[t].POP));
+  }
+
+  var noon=d['1200']||d['1300']||d['1100']||d[times[0]]||{};
+  var sky=PTYMAP[noon.PTY]||SKYMAP[noon.SKY]||'-';
+
+  // 어제
+  var yd={},yi=j4.response&&j4.response.body&&j4.response.body.items?j4.response.body.items.item:[];
+  for(var i=0;i<yi.length;i++){var it=yi[i];if(it.fcstDate!==pd)continue;if(!yd[it.category])yd[it.category]=it.fcstValue}
+  var yTMX=yd.TMX?Math.round(parseFloat(yd.TMX)):'-';
+  var yTMN=yd.TMN?Math.round(parseFloat(yd.TMN)):'-';
+
+  // 미세먼지
+  var di=j3.response&&j3.response.body&&j3.response.body.items?j3.response.body.items:[];
+  var slots={오전:null,오후:null,저녁:null};
+  for(var i=0;i<di.length;i++){
+    var item=di[i],g=item.informGrade||'',dt=item.dataTime||'';
+    var m=g.match(/인천\s*:\s*([^\s,]+)/);
+    if(m){
+      if(dt.indexOf('05시')>=0&&!slots['오전'])slots['오전']=m[1];
+      else if(dt.indexOf('11시')>=0&&!slots['오후'])slots['오후']=m[1];
+      else if(dt.indexOf('17시')>=0&&!slots['저녁'])slots['저녁']=m[1];
+    }
+  }
+  return{TMX:TMX,TMN:TMN,yTMX:yTMX,yTMN:yTMN,POP:POP,sky:sky,slots:slots}
+}
+
+// ── Open-Meteo ──
+async function openMeteo(days){
+  var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lng+'&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max&timezone=Asia%2FSeoul&forecast_days='+days;
+  var r=await fetch(url);
+  return await r.json()
+}
+
+// ── 렌더: 오늘 KMA ──
+function renderKMAToday(data){
+  var dustH='';
+  var sl=['오전','오후','저녁'];
+  for(var i=0;i<sl.length;i++){var g=dustGrd(data.slots[sl[i]]);dustH+='<div class="dchip"><div class="dtime">'+sl[i]+'</div><div class="dval '+g.c+'">'+g.l+'</div></div>'}
+  var n=new Date();
+  return '<div class="sec"><div class="slbl">오늘 날씨 · '+locName+'</div><div class="card">'+
+    '<div class="tgrid">'+
+    '<div class="tcell"><div class="tlbl">최고기온</div><div class="tval">'+(data.TMX!==null?data.TMX:'-')+'<sup>°</sup></div><div class="tsub">어제 '+data.yTMX+'°</div></div>'+
+    '<div class="tcell"><div class="tlbl">최저기온</div><div class="tval">'+(data.TMN!==null?data.TMN:'-')+'<sup>°</sup></div><div class="tsub">어제 '+data.yTMN+'°</div></div>'+
+    '<div class="tcell"><div class="tlbl">강수확률</div><div class="tval">'+data.POP+'<sup>%</sup></div></div>'+
+    '</div>'+
+    '<div class="irow"><span class="ikey">날씨</span><span class="ival"><span class="wemo">'+emo(data.sky)+'</span>'+data.sky+'</span></div>'+
+    '<div class="dwrap"><div class="dlbl">미세먼지 (PM2.5)</div><div class="dgrid">'+dustH+'</div></div>'+
+    '</div><div class="upd">'+p2(n.getHours())+':'+p2(n.getMinutes())+' 기준</div></div>'
+}
+
+// ── 렌더: 오늘 OpenMeteo ──
+function renderOMToday(data){
+  if(!data||!data.daily)return'<div class="sec"><div class="err">날씨 데이터 없음</div></div>';
+  var d=data.daily,desc=wmoDesc(d.weathercode[0]);
+  var n=new Date();
+  return '<div class="sec"><div class="slbl">오늘 날씨 · '+locName+'</div><div class="card">'+
+    '<div class="tgrid">'+
+    '<div class="tcell"><div class="tlbl">최고기온</div><div class="tval">'+Math.round(d.temperature_2m_max[0])+'<sup>°</sup></div></div>'+
+    '<div class="tcell"><div class="tlbl">최저기온</div><div class="tval">'+Math.round(d.temperature_2m_min[0])+'<sup>°</sup></div></div>'+
+    '<div class="tcell"><div class="tlbl">강수확률</div><div class="tval">'+d.precipitation_probability_max[0]+'<sup>%</sup></div></div>'+
+    '</div>'+
+    '<div class="irow"><span class="ikey">날씨</span><span class="ival"><span class="wemo">'+emo(desc)+'</span>'+desc+'</span></div>'+
+    '</div><div class="upd">'+p2(n.getHours())+':'+p2(n.getMinutes())+' 기준 · Open-Meteo</div></div>'
+}
+
+// ── 렌더: 주간 ──
+function renderWeek(data,days){
+  if(!data||!data.daily)return'<div class="sec"><div class="err">주간 날씨 데이터 없음</div></div>';
+  var d=data.daily,today=new Date();today.setHours(0,0,0,0);
+  var rows='',cnt=Math.min(days,d.time.length);
+  for(var i=0;i<cnt;i++){
+    var dt=new Date(d.time[i]+'T00:00:00'),isT=dt.getTime()===today.getTime();
+    var dl=isT?'오늘':DAYS[dt.getDay()]+'요';
+    var mmdd=(dt.getMonth()+1)+'/'+dt.getDate();
+    var desc=wmoDesc(d.weathercode[i]),pop=d.precipitation_probability_max[i]||0;
+    rows+='<div class="wrow">'+
+      '<div class="wday'+(isT?' td':'')+'">'+dl+'<br><span>'+mmdd+'</span></div>'+
+      '<div class="wsky"><span class="wskyemo">'+emo(desc)+'</span>'+desc+'</div>'+
+      '<div class="wtemps"><span class="whi">'+Math.round(d.temperature_2m_max[i])+'°</span><span class="wlo">'+Math.round(d.temperature_2m_min[i])+'°</span></div>'+
+      '<div class="wpop">'+(pop>0?pop+'%':'')+'</div>'+
+      '</div>'
+  }
+  var lbl=days<=7?'일주일':'2주일';
+  return'<div class="sec"><div class="slbl">'+lbl+' 날씨 · '+locName+'</div><div class="card">'+rows+'</div></div>'
+}
+
+// ── 날씨 탭 렌더 ──
+function renderWTabs(){
+  document.getElementById('wtabs').innerHTML=
+    '<div class="tabs">'+
+    '<button class="tab'+(wtab==='today'?' on':'')+'" onclick="setWTab(\'today\',this)">오늘</button>'+
+    '<button class="tab'+(wtab==='week'?' on':'')+'" onclick="setWTab(\'week\',this)">일주일</button>'+
+    '<button class="tab'+(wtab==='two'?' on':'')+'" onclick="setWTab(\'two\',this)">2주일</button>'+
+    '</div>'
+}
+
+function setWTab(tab,el){
+  wtab=tab;
+  document.querySelectorAll('#wtabs .tab').forEach(function(t){t.classList.remove('on')});
+  el.classList.add('on');
+  loadWeather()
+}
+
+async function loadWeather(){
+  document.getElementById('warea').innerHTML='<div class="sec"><div class="loading"><span class="spin"></span>날씨 불러오는 중...</div></div>';
+  try{
+    if(wtab==='today'){
+      if(isKR){var data=await kmaToday();document.getElementById('warea').innerHTML=renderKMAToday(data)}
+      else{var data=await openMeteo(1);document.getElementById('warea').innerHTML=renderOMToday(data)}
+    }else if(wtab==='week'){
+      if(!wCache.week)wCache.week=await openMeteo(7);
+      document.getElementById('warea').innerHTML=renderWeek(wCache.week,7)
+    }else{
+      if(!wCache.two)wCache.two=await openMeteo(14);
+      document.getElementById('warea').innerHTML=renderWeek(wCache.two,14)
+    }
+  }catch(e){
+    document.getElementById('warea').innerHTML='<div class="sec"><div class="err">날씨 로딩 실패: '+e.message+'</div></div>'
+  }
+}
+
+// ── 일정 ──
+// 날짜를 YYYY-MM-DD 형식으로 반환
+function dateStr(d){return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
+
+var SCHEDS=[
+  {date:'2026-06-16',cal:'🌱 하민',title:'그린워크 - 양떼목장',time:'종일 · 출발 9:30'},
+  {date:'2026-06-16',cal:'🪴 하진',title:'SD글로벌 어학원',time:'14:30 - 16:00'},
+  {date:'2026-06-16',cal:'🪴 하진',title:'방문미술 - 권이재 선생님',time:'17:10 - 18:10'},
+  {date:'2026-06-17',cal:'🪴 하진',title:'방문미술 - 권이재 선생님',time:'17:10 - 18:10'},
+  {date:'2026-06-18',cal:'🌱 하민',title:'피아노 레슨',time:'15:00 - 16:00'},
+  {date:'2026-06-19',cal:'🪴 하진',title:'SD글로벌 어학원',time:'14:30 - 16:00'},
+  {date:'2026-06-20',cal:'🌱 하민',title:'수영',time:'10:00 - 11:00'},
+  {date:'2026-06-21',cal:'가족',title:'가족 나들이',time:'종일'},
+  {date:'2026-06-22',cal:'🪴 하진',title:'SD글로벌 어학원',time:'14:30 - 16:00'},
+  {date:'2026-06-23',cal:'🌱 하민',title:'피아노 레슨',time:'15:00 - 16:00'},
+  {date:'2026-06-24',cal:'🪴 하진',title:'방문미술 - 권이재 선생님',time:'17:10 - 18:10'},
+  {date:'2026-06-25',cal:'가족',title:'할머니댁 방문',time:'종일'},
+  {date:'2026-06-26',cal:'🌱 하민',title:'수영',time:'10:00 - 11:00'},
+  {date:'2026-06-27',cal:'🪴 하진',title:'SD글로벌 어학원',time:'14:30 - 16:00'},
+  {date:'2026-06-28',cal:'🌱 하민',title:'피아노 레슨',time:'15:00 - 16:00'},
+  {date:'2026-06-29',cal:'🪴 하진',title:'방문미술 - 권이재 선생님',time:'17:10 - 18:10'},
+];
+
+function setStab(tab,el){
+  stab=tab;
+  document.querySelectorAll('.stab').forEach(function(t){t.classList.remove('on')});
+  el.classList.add('on');
+  renderSched()
+}
+
+function renderSched(){
+  var now=new Date(),td=dateStr(now);
+  var end=new Date(now);
+  if(stab==='week')end=new Date(+now+6*86400000);
+  else if(stab==='two')end=new Date(+now+13*86400000);
+  var edStr=dateStr(end);
+
+  var filtered=SCHEDS.filter(function(s){return s.date>=td&&s.date<=edStr});
+  var grouped={};
+  for(var i=0;i<filtered.length;i++){var s=filtered[i];if(!grouped[s.date])grouped[s.date]=[];grouped[s.date].push(s)}
+
+  var items='';
+  var dates=Object.keys(grouped).sort();
+  for(var i=0;i<dates.length;i++){
+    var date=dates[i];
+    var dt=new Date(date+'T00:00:00');
+    var isT=date===td;
+    var dlbl=isT?'오늘 · '+(dt.getMonth()+1)+'월 '+dt.getDate()+'일 ('+DAYS[dt.getDay()]+')':(dt.getMonth()+1)+'월 '+dt.getDate()+'일 ('+DAYS[dt.getDay()]+')';
+    items+='<div class="dheader'+(isT?' dtoday':'')+'">📅 '+dlbl+'</div>';
+    for(var j=0;j<grouped[date].length;j++){
+      var s=grouped[date][j];
+      items+='<div class="si"><div class="scal">'+s.cal+'</div><div class="stitle">'+s.title+'</div><div class="stime">'+s.time+'</div></div>'
+    }
+  }
+  if(!items)items='<div class="sempty">일정이 없어요</div>';
+
+  document.getElementById('schedArea').innerHTML=
+    '<div class="tabs">'+
+    '<button class="tab stab'+(stab==='today'?' on':'')+'" onclick="setStab(\'today\',this)">오늘 일정</button>'+
+    '<button class="tab stab'+(stab==='week'?' on':'')+'" onclick="setStab(\'week\',this)">일주일</button>'+
+    '<button class="tab stab'+(stab==='two'?' on':'')+'" onclick="setStab(\'two\',this)">2주일</button>'+
+    '</div>'+
+    '<div class="sec"><div class="card">'+items+'</div></div>'+
+    '<div class="sec"><div class="notice">⚠️ 내일(17일) 수도권 소나기 예보 5~30mm · 우산 챙기세요!</div></div>'
+}
+
+// ── 검색 ──
+function openSearch(){document.getElementById('ovl').classList.add('open');setTimeout(function(){document.getElementById('sinput').focus()},200)}
+function closeSearch(){
+  document.getElementById('ovl').classList.remove('open');
+  document.getElementById('sinput').value='';
+  document.getElementById('sclr').style.display='none';
+  document.getElementById('sres').innerHTML='<div class="shint">국내외 도시명을 입력하세요</div>'
+}
+function ovlClick(e){if(e.target===document.getElementById('ovl'))closeSearch()}
+function clrSearch(){document.getElementById('sinput').value='';document.getElementById('sclr').style.display='none';document.getElementById('sres').innerHTML='<div class="shint">국내외 도시명을 입력하세요</div>';document.getElementById('sinput').focus()}
+function onSInput(){
+  var q=document.getElementById('sinput').value.trim();
+  document.getElementById('sclr').style.display=q?'block':'none';
+  clearTimeout(stimer);
+  if(!q){document.getElementById('sres').innerHTML='<div class="shint">국내외 도시명을 입력하세요</div>';return}
+  stimer=setTimeout(function(){searchCity(q)},400)
+}
+async function searchCity(q){
+  document.getElementById('sres').innerHTML='<div class="shint"><span class="spin"></span>검색 중...</div>';
+  try{
+    var r=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(q)+'&format=json&limit=6&accept-language=ko');
+    var data=await r.json();
+    if(!data.length){document.getElementById('sres').innerHTML='<div class="shint">결과가 없어요.</div>';return}
+    var html='';
+    for(var i=0;i<data.length;i++){
+      var item=data[i];
+      var name=item.display_name.split(',')[0];
+      var sub=item.display_name.split(',').slice(1,3).join(',').trim();
+      html+='<div class="ritem" onclick="pickCity('+item.lat+','+item.lon+',\''+name.replace(/'/g,"\\'")+'\')">'+'<div>'+name+'</div><div class="rsub">'+sub+'</div></div>'
+    }
+    document.getElementById('sres').innerHTML=html
+  }catch(e){document.getElementById('sres').innerHTML='<div class="shint">검색 실패. 다시 시도해주세요.</div>'}
+}
+async function pickCity(la,lo,name){
+  closeSearch();
+  lat=parseFloat(la);lng=parseFloat(lo);locName=name;
+  var g=ll2grid(lat,lng);nx=g.nx;ny=g.ny;
+  isKR=lat>=33&&lat<=38.9&&lng>=124&&lng<=132;
+  document.getElementById('locname').textContent=locName;
+  wCache={};wtab='today';
+  renderWTabs();
+  await loadWeather()
+}
+
+// ── 초기화 ──
+async function init(){
+  setDate();wCache={};
+  document.getElementById('locname').textContent='위치 확인 중...';
+  try{
+    var pos=await new Promise(function(res,rej){navigator.geolocation.getCurrentPosition(res,rej,{timeout:8000})});
+    lat=pos.coords.latitude;lng=pos.coords.longitude;
+    var g=ll2grid(lat,lng);nx=g.nx;ny=g.ny;
+    isKR=lat>=33&&lat<=38.9&&lng>=124&&lng<=132;
+    try{
+      var r=await fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json&accept-language=ko');
+      var d=await r.json(),a=d.address;
+      locName=a.city||a.county||a.town||a.village||a.suburb||'현재위치'
+    }catch{locName='현재위치'}
+  }catch(e){lat=37.4563;lng=126.7052;nx=55;ny=124;locName='인천';isKR=true}
+  document.getElementById('locname').textContent=locName;
+  renderSched();
+  renderWTabs();
+  await loadWeather()
+}
+
+init();
+</script>
+</body>
+</html>
